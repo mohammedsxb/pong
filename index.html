@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة Pong</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            background: #000;
+            border: 3px solid white;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            gap: 40px;
+        }
+
+        .score-item {
+            flex: 1;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            color: #764ba2;
+            margin: 10px 0;
+        }
+
+        .difficulty {
+            font-size: 1.2em;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .controls {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+        }
+
+        .btn-start {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-pause {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-pause:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .winner {
+            color: #27ae60;
+        }
+
+        .game-over {
+            color: #e74c3c;
+        }
+
+        .paused {
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏓 لعبة Pong</h1>
+        <canvas id="pongCanvas" width="800" height="400"></canvas>
+        
+        <div class="info-panel">
+            <div class="score-container">
+                <div class="score-item">
+                    <div class="score-label">أنت</div>
+                    <div class="score-value" id="playerScore">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">الحاسوب</div>
+                    <div class="score-value" id="computerScore">0</div>
+                </div>
+            </div>
+
+            <div class="timer">⏱️ الوقت: <span id="timer">5:00</span></div>
+            <div class="difficulty">📊 الصعوبة: <span id="difficulty">سهل</span></div>
+
+            <div class="controls">
+                <div>🎮 التحكم:</div>
+                <div>⬆️ / ⬇️ أسهم الكيبورد أو 🖱️ الماوس</div>
+                <div>🛑 SPACE لإيقاف / استنئاف</div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-start" onclick="startGame()">ابدأ اللعبة</button>
+                <button class="btn-pause" onclick="togglePause()">إيقاف مؤقت</button>
+                <button class="btn-reset" onclick="resetGame()">إعادة تعيين</button>
+            </div>
+
+            <div class="message" id="message"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
