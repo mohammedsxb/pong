@@ -1,5 +1,5 @@
 // Game Constants
-const GAME_DURATION = 5 * 60; // 5 minutes in seconds
+const GAME_DURATION = 6 * 60; // 6 minutes in seconds
 const WIN_SCORE = 7;
 
 let canvas, ctx;
@@ -157,7 +157,7 @@ function updateScore() {
 
 function updateDifficulty() {
     const levels = ['سهل', 'متوسط', 'صعب', 'جداً صعب'];
-    gameState.difficulty = Math.floor((GAME_DURATION - gameState.timeRemaining) / 75) + 1;
+    gameState.difficulty = Math.floor((GAME_DURATION - gameState.timeRemaining) / 90) + 1;
     gameState.difficulty = Math.min(gameState.difficulty, 4);
     document.getElementById('difficulty').textContent = levels[gameState.difficulty - 1];
 }
