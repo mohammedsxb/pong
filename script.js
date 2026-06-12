@@ -1,42 +1,8 @@
 // Game Constants
-const CANVAS = document.getElementById('pongCanvas');
-const CTX = CANVAS.getContext('2d');
 const GAME_DURATION = 5 * 60; // 5 minutes in seconds
 const WIN_SCORE = 7;
 
-// Game Objects
-const paddleWidth = 10;
-const paddleHeight = 80;
-const ballSize = 8;
-
-const player = {
-    x: 20,
-    y: CANVAS.height / 2 - paddleHeight / 2,
-    width: paddleWidth,
-    height: paddleHeight,
-    dy: 0,
-    speed: 6
-};
-
-const computer = {
-    x: CANVAS.width - 30,
-    y: CANVAS.height / 2 - paddleHeight / 2,
-    width: paddleWidth,
-    height: paddleHeight,
-    dy: 0,
-    speed: 4
-};
-
-const ball = {
-    x: CANVAS.width / 2,
-    y: CANVAS.height / 2,
-    dx: 5,
-    dy: 5,
-    size: ballSize,
-    speed: 5
-};
-
-// Game State
+let canvas, ctx;
 let gameState = {
     running: false,
     paused: false,
@@ -47,28 +13,82 @@ let gameState = {
     difficulty: 1
 };
 
-// Input handling
-const keys = {};
-let mouseY = CANVAS.height / 2;
+const paddleWidth = 10;
+const paddleHeight = 80;
+const ballSize = 8;
 
-document.addEventListener('keydown', (e) => {
+let player = {
+    x: 20,
+    y: 0,
+    width: paddleWidth,
+    height: paddleHeight,
+    dy: 0,
+    speed: 6
+};
+
+let computer = {
+    x: 0,
+    y: 0,
+    width: paddleWidth,
+    height: paddleHeight,
+    dy: 0,
+    speed: 4
+};
+
+let ball = {
+    x: 0,
+    y: 0,
+    dx: 5,
+    dy: 5,
+    size: ballSize,
+    speed: 5
+};
+
+const keys = {};
+let mouseY = 0;
+
+// Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+    canvas = document.getElementById('pongCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // Initialize positions
+    player.y = canvas.height / 2 - paddleHeight / 2;
+    computer.x = canvas.width - 30;
+    computer.y = canvas.height / 2 - paddleHeight / 2;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    
+    // Setup event listeners
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    
+    // Initial draw
+    updateScore();
+    updateDifficulty();
+    updateTimer();
+    draw();
+});
+
+function handleKeyDown(e) {
     keys[e.key] = true;
     if (e.key === ' ') {
         e.preventDefault();
         togglePause();
     }
-});
+}
 
-document.addEventListener('keyup', (e) => {
+function handleKeyUp(e) {
     keys[e.key] = false;
-});
+}
 
-CANVAS.addEventListener('mousemove', (e) => {
-    const rect = CANVAS.getBoundingClientRect();
+function handleMouseMove(e) {
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
     mouseY = e.clientY - rect.top;
-});
+}
 
-// Game Functions
 function startGame() {
     if (gameState.gameStarted && !gameState.running) {
         gameState.running = true;
@@ -111,13 +131,13 @@ function resetGame() {
         difficulty: 1
     };
     
-    ball.x = CANVAS.width / 2;
-    ball.y = CANVAS.height / 2;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
     ball.dx = 5;
     ball.dy = 5;
     
-    player.y = CANVAS.height / 2 - paddleHeight / 2;
-    computer.y = CANVAS.height / 2 - paddleHeight / 2;
+    player.y = canvas.height / 2 - paddleHeight / 2;
+    computer.y = canvas.height / 2 - paddleHeight / 2;
     
     updateScore();
     updateDifficulty();
@@ -180,7 +200,6 @@ function checkTimeUp() {
 }
 
 function updatePlayerPaddle() {
-    // Keyboard control
     if (keys['ArrowUp']) {
         player.y -= player.speed;
     }
@@ -188,16 +207,14 @@ function updatePlayerPaddle() {
         player.y += player.speed;
     }
     
-    // Mouse control
     const mouseDistance = mouseY - (player.y + paddleHeight / 2);
     if (Math.abs(mouseDistance) > 5) {
         player.y += mouseDistance * 0.15;
     }
     
-    // Boundary checking
     if (player.y < 0) player.y = 0;
-    if (player.y + paddleHeight > CANVAS.height) {
-        player.y = CANVAS.height - paddleHeight;
+    if (player.y + paddleHeight > canvas.height) {
+        player.y = canvas.height - paddleHeight;
     }
 }
 
@@ -205,7 +222,6 @@ function updateComputerPaddle() {
     const computerCenter = computer.y + paddleHeight / 2;
     const ballDistance = ball.y - computerCenter;
     
-    // AI difficulty increases with time
     let speed = computer.speed + (gameState.difficulty - 1) * 1.5;
     
     if (Math.abs(ballDistance) > 10) {
@@ -213,10 +229,9 @@ function updateComputerPaddle() {
         computer.y += computer.dy;
     }
     
-    // Boundary checking
     if (computer.y < 0) computer.y = 0;
-    if (computer.y + paddleHeight > CANVAS.height) {
-        computer.y = CANVAS.height - paddleHeight;
+    if (computer.y + paddleHeight > canvas.height) {
+        computer.y = canvas.height - paddleHeight;
     }
 }
 
@@ -224,10 +239,10 @@ function updateBall() {
     ball.x += ball.dx;
     ball.y += ball.dy;
     
-    // Top and bottom collision
-    if (ball.y - ball.size < 0 || ball.y + ball.size > CANVAS.height) {
+    // Wall collision
+    if (ball.y - ball.size < 0 || ball.y + ball.size > canvas.height) {
         ball.dy = -ball.dy;
-        ball.y = ball.y - ball.size < 0 ? ball.size : CANVAS.height - ball.size;
+        ball.y = ball.y - ball.size < 0 ? ball.size : canvas.height - ball.size;
     }
     
     // Player paddle collision
@@ -236,10 +251,9 @@ function updateBall() {
         ball.y > player.y &&
         ball.y < player.y + player.height
     ) {
-        ball.dx = -ball.dx;
+        ball.dx = Math.abs(ball.dx);
         ball.x = player.x + player.width + ball.size;
         
-        // Add spin based on paddle movement
         const paddleCenter = player.y + paddleHeight / 2;
         const collidePoint = ball.y - paddleCenter;
         ball.dy = (collidePoint / (paddleHeight / 2)) * (ball.speed + gameState.difficulty);
@@ -251,7 +265,7 @@ function updateBall() {
         ball.y > computer.y &&
         ball.y < computer.y + computer.height
     ) {
-        ball.dx = -ball.dx;
+        ball.dx = -Math.abs(ball.dx);
         ball.x = computer.x - ball.size;
         
         const paddleCenter = computer.y + paddleHeight / 2;
@@ -265,7 +279,7 @@ function updateBall() {
         updateScore();
         resetBall();
     }
-    if (ball.x > CANVAS.width) {
+    if (ball.x > canvas.width) {
         gameState.playerScore++;
         updateScore();
         resetBall();
@@ -273,35 +287,37 @@ function updateBall() {
 }
 
 function resetBall() {
-    ball.x = CANVAS.width / 2;
-    ball.y = CANVAS.height / 2;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
     ball.dx = (Math.random() > 0.5 ? 1 : -1) * (ball.speed + (gameState.difficulty - 1) * 0.5);
     ball.dy = (Math.random() - 0.5) * (ball.speed + (gameState.difficulty - 1) * 0.5);
 }
 
 function draw() {
+    if (!ctx) return;
+    
     // Clear canvas
-    CTX.fillStyle = '#000';
-    CTX.fillRect(0, 0, CANVAS.width, CANVAS.height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw center line
-    CTX.strokeStyle = '#fff';
-    CTX.setLineDash([10, 10]);
-    CTX.beginPath();
-    CTX.moveTo(CANVAS.width / 2, 0);
-    CTX.lineTo(CANVAS.width / 2, CANVAS.height);
-    CTX.stroke();
-    CTX.setLineDash([]);
+    ctx.strokeStyle = '#fff';
+    ctx.setLineDash([10, 10]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
     
     // Draw paddles
-    CTX.fillStyle = '#fff';
-    CTX.fillRect(player.x, player.y, player.width, player.height);
-    CTX.fillRect(computer.x, computer.y, computer.width, computer.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.fillRect(computer.x, computer.y, computer.width, computer.height);
     
     // Draw ball
-    CTX.beginPath();
-    CTX.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
-    CTX.fill();
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function gameLoop() {
@@ -334,9 +350,3 @@ function gameLoop() {
     
     requestAnimationFrame(gameLoop);
 }
-
-// Initialize
-updateScore();
-updateDifficulty();
-updateTimer();
-draw();
