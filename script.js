@@ -10,7 +10,8 @@ let gameState = {
     playerScore: 0,
     computerScore: 0,
     timeRemaining: GAME_DURATION,
-    difficulty: 1
+    difficulty: 1,
+    lastUpdateTime: 0
 };
 
 const paddleWidth = 10;
@@ -93,6 +94,7 @@ function startGame() {
     if (gameState.gameStarted && !gameState.running) {
         gameState.running = true;
         gameState.paused = false;
+        gameState.lastUpdateTime = Date.now();
         updateMessage('اللعبة جارية...', '');
         gameLoop();
         return;
@@ -103,6 +105,7 @@ function startGame() {
         gameState.running = true;
         gameState.paused = false;
         gameState.timeRemaining = GAME_DURATION;
+        gameState.lastUpdateTime = Date.now();
         updateMessage('اللعبة جارية...', '');
         gameLoop();
     }
@@ -115,6 +118,7 @@ function togglePause() {
     if (gameState.paused) {
         updateMessage('اللعبة موقوفة مؤقتاً', 'paused');
     } else {
+        gameState.lastUpdateTime = Date.now();
         updateMessage('اللعبة جارية...', '');
         gameLoop();
     }
@@ -128,7 +132,8 @@ function resetGame() {
         playerScore: 0,
         computerScore: 0,
         timeRemaining: GAME_DURATION,
-        difficulty: 1
+        difficulty: 1,
+        lastUpdateTime: 0
     };
     
     ball.x = canvas.width / 2;
@@ -331,10 +336,16 @@ function gameLoop() {
         return;
     }
     
-    // Update game state
-    gameState.timeRemaining--;
-    updateTimer();
-    updateDifficulty();
+    // Update time based on real elapsed time
+    const currentTime = Date.now();
+    const elapsedSeconds = (currentTime - gameState.lastUpdateTime) / 1000;
+    
+    if (elapsedSeconds >= 1) {
+        gameState.timeRemaining -= Math.floor(elapsedSeconds);
+        gameState.lastUpdateTime = currentTime;
+        updateTimer();
+        updateDifficulty();
+    }
     
     updatePlayerPaddle();
     updateComputerPaddle();
